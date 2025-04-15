@@ -13,19 +13,21 @@ public class Agendamento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Relacionamento ManyToOne com a entidade Cliente
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
-    @NotBlank(message = "O serviço não pode ser vazio")
+    @NotBlank(message = "O serviço não pode ser vazio") // Validação de campo não vazio
     private String servico;
 
-    @NotNull(message = "O horário de início não pode ser nulo")
+    @NotNull(message = "O horário de início não pode ser nulo") // Validação de horário de início
     private LocalDateTime horarioInicio;
 
-    @NotNull(message = "O horário de término não pode ser nulo")
+    @NotNull(message = "O horário de término não pode ser nulo") // Validação de horário de término
     private LocalDateTime horarioTermino;
 
+    // Método de validação para garantir que o horário de término seja posterior ao de início
     public void validarHorarios() {
         if (horarioTermino.isBefore(horarioInicio)) {
             throw new IllegalArgumentException("O horário de término não pode ser antes do horário de início.");

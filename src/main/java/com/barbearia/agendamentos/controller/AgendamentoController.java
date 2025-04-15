@@ -4,6 +4,7 @@ import com.barbearia.agendamentos.model.Agendamento;
 import com.barbearia.agendamentos.model.Cliente;
 import com.barbearia.agendamentos.repository.AgendamentoRepository;
 import com.barbearia.agendamentos.repository.ClienteRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,55 +27,51 @@ public class AgendamentoController {
     @Autowired
     private ClienteRepository clienteRepository;
 
+    // Retorna todos os agendamentos existentes
     @GetMapping
     public List<Agendamento> listarTodos() {
         return agendamentoRepository.findAll();
     }
 
+    // Cria um novo agendamento
     @PostMapping
     public ResponseEntity<?> criar(@RequestBody Agendamento agendamento) {
         try {
-            agendamento.validarHorarios();
+            agendamento.validarHorarios(); // Validação customizada do horário (ex: horário válido)
 
-            // Verifica se o horário do agendamento já está ocupado
             boolean ocupado = agendamentoRepository.existsByHorarioInicio(agendamento.getHorarioInicio());
-
             if (ocupado) {
                 throw new RuntimeException("Horário já agendado.");
             }
 
-            // Verifica se o cliente já existe. Se não, cria um novo cliente.
             Cliente cliente = agendamento.getCliente();
             if (cliente.getId() == null) {
-                cliente = clienteRepository.save(cliente); // Salvando o cliente
-                agendamento.setCliente(cliente); // Associando o cliente ao agendamento
+                // Se cliente ainda não existir, salva no banco
+                cliente = clienteRepository.save(cliente);
+                agendamento.setCliente(cliente);
             }
 
-            // Salva o agendamento no banco de dados
             Agendamento criado = agendamentoRepository.save(agendamento);
-
-            // Retorna status 201 (Created) com o objeto criado no corpo da resposta
             return ResponseEntity.status(HttpStatus.CREATED).body(criado);
 
         } catch (RuntimeException e) {
-            // Em caso de erro (horário já ocupado, etc.), retorna status 409 (Conflict) com o erro
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
         }
     }
 
+    // Lista horários disponíveis de um determinado dia
     @GetMapping("/horarios-disponiveis")
-    public List<LocalDateTime> listarHorariosDisponiveis(@RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
-        // Obter todos os agendamentos para o dia solicitado
+    public List<LocalDateTime> listarHorariosDisponiveis(
+            @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data
+    ) {
         List<Agendamento> agendamentos = agendamentoRepository.findByHorarioInicioBetween(
                 data.atTime(8, 0), data.atTime(18, 0)
         );
 
-        // Obter os horários já ocupados
         Set<LocalTime> horariosOcupados = agendamentos.stream()
                 .map(a -> a.getHorarioInicio().toLocalTime())
                 .collect(Collectors.toSet());
 
-        // Gerar uma lista de horários livres para o intervalo de 8h às 18h
         List<LocalDateTime> horariosDisponiveis = new ArrayList<>();
         for (int hora = 8; hora < 18; hora++) {
             LocalTime horario = LocalTime.of(hora, 0);
@@ -85,7 +79,30 @@ public class AgendamentoController {
                 horariosDisponiveis.add(data.atTime(horario));
             }
         }
+
         return horariosDisponiveis;
     }
 
+    // Lista agendamentos de um dia específico
+    @GetMapping("/agendamentos-dia")
+    public List<Agendamento> listarAgendamentosPorData(
+            @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data
+    ) {
+        LocalDateTime inicioDoDia = data.atStartOfDay();
+        LocalDateTime fimDoDia = data.atTime(23, 59, 59);
+
+        return agendamentoRepository.findByHorarioInicioBetween(inicioDoDia, fimDoDia);
+    }
+
+    // Exclui um agendamento com base no ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> excluir(@PathVariable Long id) {
+        if (!agendamentoRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("erro", "Agendamento não encontrado."));
+        }
+
+        agendamentoRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

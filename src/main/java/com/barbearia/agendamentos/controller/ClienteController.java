@@ -2,6 +2,7 @@ package com.barbearia.agendamentos.controller;
 
 import com.barbearia.agendamentos.model.Cliente;
 import com.barbearia.agendamentos.repository.ClienteRepository;
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,21 +21,27 @@ public class ClienteController {
     @Autowired
     private ClienteRepository clienteRepository;
 
+    // Endpoint para listar todos os clientes. Apenas usuários com a role 'ADMIN' podem acessar.
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<Cliente> listarTodos() {
         return clienteRepository.findAll();
     }
 
+    // Endpoint para criar um novo cliente. Apenas usuários com a role 'ADMIN' podem acessar.
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Cliente> criar(@RequestBody @Valid Cliente cliente) {
-        // Verifica se já existe um cliente com o mesmo telefone
+        // Verifica se já existe um cliente com o mesmo número de telefone
         if (clienteRepository.existsByTelefone(cliente.getTelefone())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(null); // Conflito, já existe o cliente com o mesmo telefone
+                    .body(null); // Retorna status 409 (CONFLICT) se o telefone já estiver cadastrado
         }
+
+        // Salva o cliente no banco de dados
         Cliente clienteSalvo = clienteRepository.save(cliente);
+
+        // Retorna o cliente salvo com o status 201 (CREATED)
         return ResponseEntity.status(HttpStatus.CREATED).body(clienteSalvo);
     }
 }

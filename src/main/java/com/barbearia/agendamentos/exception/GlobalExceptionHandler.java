@@ -12,7 +12,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Tratando exceções gerais
+    // Tratando exceções gerais como erros inesperados
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleRuntime(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    // Tratando exceções específicas (exemplo: quando não encontrar um cliente)
+    // Tratando exceções específicas quando uma entidade não é encontrada (exemplo: cliente não encontrado)
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<?> handleEntityNotFound(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    // Exemplo de tratamento para violação de constraints (validação de dados)
+    // Tratando violação de constraints (erros de validação de dados)
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<?> handleConstraintViolation(ConstraintViolationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

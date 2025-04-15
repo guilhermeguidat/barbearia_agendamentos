@@ -2,18 +2,18 @@
 
 ### 📦 Agendamentos
 
-| Método | Rota                         | Acesso   | Descrição                    |
-|--------|------------------------------|----------|------------------------------|
-| GET    | /agendamentos                | Admin    | Lista todos os agendamentos |
-| GET    | /agendamentos/dia?data=...   | Admin    | Lista agendamentos do dia   |
-| POST   | /agendamentos                | Público  | Cria novo agendamento       |
-| DELETE | /agendamentos/{id}           | Admin    | Exclui um agendamento       |
+| Método | Rota                                                 | Acesso   | Descrição                    |
+|--------|------------------------------------------------------|----------|------------------------------|
+| GET    | /agendamentos                                        | Admin    | Lista todos os agendamentos |
+| GET    | /agendamentos/agendamentos-dia?data=yyyy-MM-dd       | Admin    | Lista agendamentos do dia   |
+| POST   | /agendamentos                                        | Público  | Cria novo agendamento       |
+| DELETE | /agendamentos/{id}                                   | Admin    | Exclui um agendamento       |
 
 ### 🕑 Horários Disponíveis
 
-| Método | Rota                           | Acesso  | Descrição                    |
-|--------|--------------------------------|---------|------------------------------|
-| GET    | /horarios-disponiveis?data=... | Público | Lista horários livres do dia |
+| Método | Rota                                                           | Acesso  | Descrição                    |
+|--------|----------------------------------------------------------------|---------|------------------------------|
+| GET    | /agendamentos/horarios-disponiveis?data=yyyy-MM-dd            | Público | Lista horários livres do dia |
 
 ---
 
@@ -23,5 +23,4 @@
 |---------|---------|
 | admin   | 123456  |
 
-Use autenticação `Basic Auth` nas requisições protegidas.
-
+Use autenticação **Basic Auth** nas requisições protegidas.

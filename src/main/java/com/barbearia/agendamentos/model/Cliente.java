@@ -12,12 +12,12 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank // Garante que o nome não seja nulo ou vazio
     @Size(min = 2, max = 100, message = "O nome do cliente deve ter entre 2 e 100 caracteres.")
     private String nome;
 
-    @NotBlank
-    @Pattern(regexp = "\\d{11}", message = "Telefone deve conter 11 dígitos")
+    @NotBlank // Garante que o telefone não seja nulo ou vazio
+    @Pattern(regexp = "\\d{11}", message = "Telefone deve conter 11 dígitos") // Valida que o telefone tenha exatamente 11 dígitos
     private String telefone;
 
     // Getters e Setters
